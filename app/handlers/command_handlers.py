@@ -1,8 +1,8 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from app.database.queries import get_user, get_count_questions, get_count_users
+from app.database.queries import get_user, get_count_questions, get_count_users, push_user, update_user
 from app.filters import IsAdmin
 from config import BOT_URL
 
@@ -31,3 +31,16 @@ async def bot_stats(message: Message):
                          f"\n\nКолво вопросов за день: {questions[0]}"
                          f"\nКолво вопросов за месяц: {questions[1]}"
                          f"\nКолво вопросов всего: {questions[2]}")
+    
+
+@commands_router.message(Command("add"), IsAdmin())
+async def bot_add_admin(message: Message):
+    if not message.text[5:].isdigit():
+        await message.answer("Нужно ввести ID")
+        return
+    user = await get_user(int(message.text[5:]))
+    if user:
+        await update_user(user.tg_id, admin=True)
+    else: 
+        await push_user(int(message.text[5:]), admin=True)
+    await message.answer("Админ добавлен")

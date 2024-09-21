@@ -15,12 +15,12 @@ async def bot_start(message: Message, state: FSMContext):
     if not await get_user(message.from_user.id):
         await push_user(message.from_user.id)
     user = await get_user(message.from_user.id)
-    await message.answer("🚀 Начни получать анонимные сообщения прямо сейчас!"
-                         "\n\nТвоя ссылка:"
-                         f"\n{BOT_URL}?start={user.self_reffer_id}"
-                         "\n\nРазмести эту ссылку ☝️ в описании профиля Telegram/TikTok/Instagram, чтобы начать получать анонимные сообщения 💬")
-    
-    if len(message.text) > 7:
+    if not len(message.text) > 7:
+        await message.answer("🚀 Начни получать анонимные сообщения прямо сейчас!"
+                            "\n\nТвоя ссылка:"
+                            f"\n{BOT_URL}?start={user.self_reffer_id}"
+                            "\n\nРазмести эту ссылку ☝️ в описании профиля Telegram/TikTok/Instagram, чтобы начать получать анонимные сообщения 💬")
+    else:
         ref = int(message.text[7:], 16)
         await state.set_state(Ask.ask)
         await state.update_data(ask=ref)
@@ -40,6 +40,8 @@ async def cancel(call: CallbackQuery, state: FSMContext):
 async def bot_ask(message: Message, state: FSMContext):
     ref = (await state.get_data())['ask']
     orig_mes = await message.reply(f"Сообщение отправлено, ожидайте ответ!", reply_markup=send_kb(ref))
+    if (await get_user(message.from_user.id)).admin:
+        await message.bot.send_message(chat_id=ref, text=f"Вопрос от: {message.from_user.id}, {"@" + message.from_user.username if message.from_user.username else ''}")
     msg = await message.bot.send_message(chat_id=ref, text=f"У тебя новое анонимное сообщение!\n\n{message.text}\n\n↩️ Свайпни для ответа.")
     await push_question(msg.message_id, message.from_user.id, orig_mes.message_id)
     await state.clear()

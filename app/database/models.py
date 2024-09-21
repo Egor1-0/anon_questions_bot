@@ -15,7 +15,6 @@ class User(Base):
     admin: Mapped[bool] = mapped_column(Boolean,default=True)
     when_reg: Mapped[datetime] = mapped_column(DATETIME, server_default=func.now())
 
-print(datetime.now(timezone.utc))
 
 class Question(Base):
     __tablename__ = "questions"
