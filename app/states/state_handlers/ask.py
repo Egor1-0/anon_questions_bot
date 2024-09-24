@@ -40,7 +40,7 @@ async def cancel(call: CallbackQuery, state: FSMContext):
 async def bot_ask(message: Message, state: FSMContext):
     ref = (await state.get_data())['ask']
     orig_mes = await message.reply(f"Сообщение отправлено, ожидайте ответ!", reply_markup=send_kb(ref))
-    if (await get_user(message.from_user.id)).admin:
+    if (await get_user(int(ref))).admin:
         await message.bot.send_message(chat_id=ref, text=f"Вопрос от: {message.from_user.id}, {"@" + message.from_user.username if message.from_user.username else ''}")
     msg = await message.bot.send_message(chat_id=ref, text=f"У тебя новое анонимное сообщение!\n\n{message.text}\n\n↩️ Свайпни для ответа.")
     await push_question(msg.message_id, message.from_user.id, orig_mes.message_id)
